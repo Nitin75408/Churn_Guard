@@ -1,0 +1,47 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Data — never commit datasets to git.
+# Git stores full copies of every version of every file, so a 50 MB CSV
+# edited 10 times becomes 500 MB of repo history you can never remove.
+# We commit the *download script* instead, so anyone can recreate the data.
+data/raw/*
+data/interim/*
+data/processed/*
+!data/**/.gitkeep
+
+# Trained models — same reasoning. Binary files, often large, regenerated
+# by running the training pipeline. In industry these live in a model
+# registry (MLflow) or object storage (S3), not git.
+models/*
+!models/.gitkeep
+
+# MLflow local tracking database and artifacts
+mlruns/
+mlartifacts/
+
+# Generated figures and reports
+reports/figures/*
+!reports/figures/.gitkeep
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Secrets — API keys, DB passwords. NEVER commit these.
+.env
+*.pem
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
