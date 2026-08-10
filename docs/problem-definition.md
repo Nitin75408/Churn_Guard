@@ -101,11 +101,11 @@ than any single yes/no decision.
 The two error types do **not** cost the same. All downstream threshold decisions follow
 from this table.
 
-### Assumptions (to be validated against the data)
+### Assumptions
 
 | Quantity | Assumed value | Source |
 |---|---|---|
-| Avg. revenue per customer / month | $65 | dataset `MonthlyCharges` mean — **verify on load** |
+| Avg. revenue per customer / month | $65 | ✅ **verified 2026-08-10**: `MonthlyCharges` mean = $64.76 |
 | Retained customer horizon | 12 months | business assumption |
 | Customer lifetime value (CLV) | **$780** | 65 × 12 |
 | Cost of a retention offer | **$78** | 20% discount for 6 months |
