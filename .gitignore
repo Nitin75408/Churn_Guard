@@ -17,6 +17,10 @@ data/raw/*
 data/interim/*
 data/processed/*
 !data/**/.gitkeep
+# ...but the split manifest is metadata, not data: a few hundred bytes
+# recording seed, split sizes and ID fingerprints. Committing it makes the
+# sealed test set auditable.
+!data/interim/split_manifest.json
 
 # Trained models — same reasoning. Binary files, often large, regenerated
 # by running the training pipeline. In industry these live in a model

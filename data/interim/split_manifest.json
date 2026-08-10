@@ -1,0 +1,25 @@
+{
+  "random_seed": 42,
+  "stratified": true,
+  "total_rows": 7043,
+  "splits": {
+    "train": {
+      "rows": 4929,
+      "share": 0.6998,
+      "churn_rate": 0.2654,
+      "id_fingerprint": "9d5dfaa4c5e5dd3b"
+    },
+    "val": {
+      "rows": 1057,
+      "share": 0.1501,
+      "churn_rate": 0.2658,
+      "id_fingerprint": "3746c18bb02b0d70"
+    },
+    "test": {
+      "rows": 1057,
+      "share": 0.1501,
+      "churn_rate": 0.2649,
+      "id_fingerprint": "9ee2405ba4ee2531"
+    }
+  }
+}
