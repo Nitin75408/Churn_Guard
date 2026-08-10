@@ -32,6 +32,9 @@ mlartifacts/
 reports/figures/*
 !reports/figures/.gitkeep
 
+# Log files — regenerated on every run, and can grow large.
+logs/
+
 # Jupyter checkpoints
 .ipynb_checkpoints/
 

@@ -1,0 +1,83 @@
+# ChurnGuard — central configuration
+#
+# Every tunable value in the project lives here. Nothing is hardcoded in the
+# source. Changing an experiment means editing this file (and committing it),
+# never editing code.
+#
+# All paths are relative to the project root and are resolved to absolute
+# paths by src/churn_guard/config.py, so scripts work no matter which
+# directory you run them from.
+
+project:
+  name: churn-guard
+  # One seed used everywhere: splitting, model init, CV shuffling.
+  # Without this, two runs of the same code give different numbers and you
+  # can never tell whether a change helped or you just got lucky.
+  random_seed: 42
+
+paths:
+  data_raw: data/raw
+  data_interim: data/interim
+  data_processed: data/processed
+  models: models
+  reports: reports
+  figures: reports/figures
+  logs: logs
+
+data:
+  # Public mirror of the IBM Telco Customer Churn sample dataset.
+  # Kaggle alternative: https://www.kaggle.com/datasets/blastchar/telco-customer-churn
+  source_url: https://raw.githubusercontent.com/IBM/telco-customer-churn-on-icp4d/master/data/Telco-Customer-Churn.csv
+  raw_filename: telco_churn_raw.csv
+
+  # Column that identifies a customer. Never a feature — it carries no signal
+  # and would let the model memorise individuals.
+  id_column: customerID
+
+  # What we are predicting.
+  target_column: Churn
+  positive_label: "Yes"
+
+  # Expected shape, asserted on load. If the source changes upstream, we want
+  # a loud failure now rather than a silently wrong model later.
+  expected_rows: 7043
+  expected_columns: 21
+
+split:
+  # 70 / 15 / 15 as specified by the challenge brief.
+  test_size: 0.15
+  val_size: 0.15
+  # Stratify keeps the churn rate identical in every split. Without it, a
+  # random split can hand the test set an unrepresentative churn rate and
+  # your evaluation becomes noise.
+  stratify: true
+
+cross_validation:
+  n_splits: 5
+  n_repeats: 1
+  shuffle: true
+
+# Business economics — drives threshold selection on Day 3.
+# See docs/problem-definition.md section 4 for the derivation.
+costs:
+  customer_lifetime_value: 780.0   # revenue lost when a churner is missed
+  retention_offer_cost: 78.0       # cost of the discount we hand out
+  offer_acceptance_rate: 0.30      # fraction of offers that actually work
+  # Operational limit: how many customers the retention team can contact.
+  # Makes Precision@K a first-class metric.
+  monthly_contact_capacity: 500
+
+evaluation:
+  primary_metric: average_precision   # PR-AUC — see problem-definition.md §5
+  # Acceptance criteria, fixed before results are seen.
+  targets:
+    average_precision: 0.65
+    roc_auc: 0.84
+    recall: 0.75
+
+logging:
+  level: INFO           # DEBUG for development, INFO for normal runs
+  file_level: DEBUG     # the log file keeps everything
+  filename: churn_guard.log
+  max_bytes: 5242880    # 5 MB, then rotate
+  backup_count: 3
