@@ -62,12 +62,12 @@ def overview(df: pd.DataFrame, cfg: ConfigSection) -> None:
     target = cfg.data.target_column
     counts = df[target].value_counts()
     rate = counts.get("Yes", 0) / len(df)
-    print(f"\n  Target balance")
+    print("\n  Target balance")
     print(f"    No  (stayed) : {counts['No']:>5,}  ({1 - rate:.1%})")
     print(f"    Yes (churned): {counts['Yes']:>5,}  ({rate:.1%})")
     print(f"\n  Imbalance ratio: {counts['No'] / counts['Yes']:.2f} : 1")
     print(f"  A model predicting 'nobody churns' scores {1 - rate:.1%} accuracy")
-    print(f"  while catching zero churners. This is why accuracy is not our metric.")
+    print("  while catching zero churners. This is why accuracy is not our metric.")
 
     fig, ax = plt.subplots(figsize=(5, 4))
     sns.countplot(data=df, x=target, hue=target, palette=CHURN_COLORS, legend=False, ax=ax)
@@ -187,7 +187,9 @@ def categorical_analysis(df: pd.DataFrame, cfg: ConfigSection) -> None:
 
     top = sorted(spreads.items(), key=lambda kv: kv[1], reverse=True)[:6]
     fig, axes = plt.subplots(2, 3, figsize=(16, 8))
-    for ax, (col, _) in zip(axes.ravel(), top):
+    # Not strict: the grid holds six axes but a dataset with fewer categorical
+    # columns yields fewer entries, and leaving the spare axes empty is fine.
+    for ax, (col, _) in zip(axes.ravel(), top, strict=False):
         rates = (
             df.groupby(col, observed=True)[target]
             .apply(lambda s: (s == "Yes").mean())

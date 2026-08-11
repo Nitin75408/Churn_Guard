@@ -35,9 +35,13 @@ dependencies = [
 # Training, experiment tracking and exploratory analysis. Installed locally by
 # default (`uv sync`), excluded from the serving image (`uv sync --no-dev`).
 dev = [
+    "httpx>=0.28.1",
     "ipykernel>=7.3.0",
     "jupyterlab>=4.6.2",
     "mlflow>=3.0",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.2",
     "seaborn>=0.13.2",
 ]
 
@@ -47,3 +51,32 @@ churn-guard = "churn_guard:main"
 [build-system]
 requires = ["uv_build>=0.12.3,<0.13.0"]
 build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+# Fail on unexpected warnings from our own code, so a deprecation is dealt with
+# when it appears rather than discovered when it becomes an error. Third-party
+# warnings we cannot fix are listed explicitly rather than blanket-ignored.
+filterwarnings = [
+    "ignore::DeprecationWarning:starlette.*",
+    "ignore::PendingDeprecationWarning:shap.*",
+    "ignore::UserWarning:sklearn.preprocessing._encoders",
+]
+
+[tool.ruff]
+line-length = 92
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes — undefined names, unused imports
+    "I",    # isort — import ordering
+    "UP",   # pyupgrade — modern syntax
+    "B",    # bugbear — likely bugs
+    "SIM",  # simplifiable code
+]
+# E501 is handled by the formatter; private-member access is deliberate in the
+# few places tests reach into scikit-learn internals to verify fitted state.
+ignore = ["E501", "SLF001"]

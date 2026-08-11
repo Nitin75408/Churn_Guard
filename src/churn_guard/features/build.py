@@ -116,7 +116,7 @@ class DomainFeatureBuilder(TransformerMixin, BaseEstimator):
     def __init__(self, id_column: str = "customerID") -> None:
         self.id_column = id_column
 
-    def fit(self, X: pd.DataFrame, y: pd.Series | None = None) -> "DomainFeatureBuilder":
+    def fit(self, X: pd.DataFrame, y: pd.Series | None = None) -> DomainFeatureBuilder:
         """No-op. Nothing is learned from the data.
 
         Feature names are recorded so scikit-learn can validate column order at

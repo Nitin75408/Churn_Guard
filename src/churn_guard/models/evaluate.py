@@ -292,9 +292,9 @@ def main() -> None:
           f"{flagged_share:.1%} of customers.")
     print(f"  The team can contact {costs.capacity}/month = {capacity_share:.1%}.")
     if flagged_share > capacity_share:
-        print(f"\n  Capacity binds. The threshold is not the operative constraint —")
+        print("\n  Capacity binds. The threshold is not the operative constraint —")
         print(f"  ranking is. Contact the top {capacity_share:.1%} by score, which is")
-        print(f"  what Precision@K measures.")
+        print("  what Precision@K measures.")
 
     # ---------------------------------------------------------------- 4 ----
     print(f"\n{'=' * 92}")

@@ -182,7 +182,10 @@ class ChurnService:
         explanations = self.explain_frame(customers)
 
         results = []
-        for probability, drivers in zip(probabilities, explanations):
+        # strict: there must be exactly one explanation per scored customer.
+        # Silently truncating to the shorter list would hand a caller someone
+        # else's drivers, which is worse than an error.
+        for probability, drivers in zip(probabilities, explanations, strict=True):
             probability = float(probability)
             results.append(
                 {

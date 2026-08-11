@@ -40,7 +40,7 @@ class Costs:
     capacity: int
 
     @classmethod
-    def from_config(cls, cfg: ConfigSection) -> "Costs":
+    def from_config(cls, cfg: ConfigSection) -> Costs:
         return cls(
             clv=float(cfg.costs.customer_lifetime_value),
             offer_cost=float(cfg.costs.retention_offer_cost),

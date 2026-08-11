@@ -37,7 +37,7 @@ import mlflow
 import mlflow.sklearn
 import numpy as np
 import pandas as pd
-from scipy.stats import loguniform, randint, uniform
+from scipy.stats import loguniform, randint
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression

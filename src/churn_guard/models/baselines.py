@@ -70,7 +70,7 @@ class BusinessRuleClassifier(ClassifierMixin, BaseEstimator):
             (X["Contract"] == "Month-to-month") & (X["tenure"] < self.tenure_threshold)
         ).to_numpy()
 
-    def fit(self, X: pd.DataFrame, y: np.ndarray) -> "BusinessRuleClassifier":
+    def fit(self, X: pd.DataFrame, y: np.ndarray) -> BusinessRuleClassifier:
         self.classes_ = np.array([0, 1])
         y = np.asarray(y)
         flagged = self._rule(X)

@@ -134,7 +134,9 @@ def explain_customers(
     labels = ["highest risk"] * n_examples + ["lowest risk"] * n_examples
 
     explanations: list[dict] = []
-    for rank, (index, label) in enumerate(zip(picks, labels)):
+    # strict: picks and labels are built from the same n_examples, so a length
+    # mismatch means the construction above is wrong and should fail loudly.
+    for rank, (index, label) in enumerate(zip(picks, labels, strict=True)):
         index = int(index)
         values = shap_values[index]
 
