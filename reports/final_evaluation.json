@@ -1,0 +1,99 @@
+{
+  "operating_threshold": 0.2785714285714286,
+  "theoretical_threshold": 0.3333333333333333,
+  "validation": {
+    "model": "validation",
+    "roc_auc": 0.8347672157610888,
+    "pr_auc": 0.640040173560186,
+    "brier": 0.13887327592810583,
+    "threshold": 0.2785714285714286,
+    "precision": 0.5375,
+    "recall": 0.7651245551601423,
+    "f1": 0.631424375917768,
+    "accuracy": 0.7625354777672658,
+    "precision_at_k": 0.7866666666666666,
+    "k": 75,
+    "value_per_1000": 18079.4701986755
+  },
+  "test": {
+    "model": "TEST (sealed)",
+    "roc_auc": 0.853389869461298,
+    "pr_auc": 0.6624289203110854,
+    "brier": 0.13373979725123147,
+    "threshold": 0.2785714285714286,
+    "precision": 0.5247058823529411,
+    "recall": 0.7964285714285714,
+    "f1": 0.6326241134751773,
+    "accuracy": 0.7549668874172185,
+    "precision_at_k": 0.84,
+    "k": 75,
+    "value_per_1000": 18005.676442762535
+  },
+  "sensitivity": [
+    {
+      "acceptance_rate": 0.15,
+      "theoretical_threshold": 0.6666666666666666,
+      "empirical_threshold": 0.7212169312169312,
+      "recall": 0.2277580071174377,
+      "value_per_1000": 1106.9063386944183,
+      "programme_viable": true
+    },
+    {
+      "acceptance_rate": 0.2,
+      "theoretical_threshold": 0.5,
+      "empirical_threshold": 0.4675661375661376,
+      "recall": 0.5551601423487544,
+      "value_per_1000": 5608.325449385052,
+      "programme_viable": true
+    },
+    {
+      "acceptance_rate": 0.25,
+      "theoretical_threshold": 0.4,
+      "empirical_threshold": 0.45761904761904765,
+      "recall": 0.5658362989323843,
+      "value_per_1000": 11401.135288552507,
+      "programme_viable": true
+    },
+    {
+      "acceptance_rate": 0.3,
+      "theoretical_threshold": 0.3333333333333333,
+      "empirical_threshold": 0.2785714285714286,
+      "recall": 0.7651245551601423,
+      "value_per_1000": 18079.4701986755,
+      "programme_viable": true
+    },
+    {
+      "acceptance_rate": 0.4,
+      "theoretical_threshold": 0.25,
+      "empirical_threshold": 0.2537037037037037,
+      "recall": 0.7864768683274022,
+      "value_per_1000": 33945.12771996216,
+      "programme_viable": true
+    },
+    {
+      "acceptance_rate": 0.5,
+      "theoretical_threshold": 0.2,
+      "empirical_threshold": 0.23380952380952383,
+      "recall": 0.8113879003558719,
+      "value_per_1000": 50622.51655629139,
+      "programme_viable": true
+    }
+  ],
+  "acceptance_criteria": {
+    "PR-AUC": {
+      "target": 0.65,
+      "achieved": 0.6624289203110854,
+      "passed": true
+    },
+    "ROC-AUC": {
+      "target": 0.84,
+      "achieved": 0.853389869461298,
+      "passed": true
+    },
+    "Recall": {
+      "target": 0.75,
+      "achieved": 0.7964285714285714,
+      "passed": true
+    }
+  }
+}
