@@ -131,6 +131,12 @@ class RankedPrediction(PredictionResponse):
     """A batch prediction with its position in the risk ranking."""
 
     rank: int = Field(ge=1, description="1 = highest risk in this batch")
+    # Because the batch response is re-sorted by risk, the caller otherwise has
+    # no way to tell which of its customers a row refers to. Carrying the
+    # original position back makes the response joinable to the request.
+    input_index: int = Field(
+        ge=0, description="Zero-based position of this customer in the request"
+    )
 
 
 class BatchPredictionResponse(BaseModel):

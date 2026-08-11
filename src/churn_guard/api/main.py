@@ -174,6 +174,11 @@ async def predict_batch(request: BatchPredictionRequest) -> BatchPredictionRespo
     frame = pd.DataFrame([c.model_dump() for c in request.customers])
     scored = service.score(frame)
 
+    # Tag with the request position before sorting, so the caller can join the
+    # ranked response back onto whatever identifiers it holds.
+    for position, row in enumerate(scored):
+        row["input_index"] = position
+
     ranked = sorted(scored, key=lambda r: r["churn_probability"], reverse=True)
     predictions = [{**row, "rank": i + 1} for i, row in enumerate(ranked)]
 
