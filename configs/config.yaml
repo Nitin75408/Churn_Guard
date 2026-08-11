@@ -57,6 +57,24 @@ cross_validation:
   n_repeats: 1
   shuffle: true
 
+tuning:
+  # Randomized rather than grid search: with the same budget it explores far
+  # more distinct values of whichever hyperparameter actually matters, instead
+  # of re-testing a handful of values in every combination.
+  n_iter: 30
+  n_jobs: -1        # use all CPU cores
+  verbose: 0
+
+mlflow:
+  experiment_name: churn-guard
+  # SQLite backend. MLflow 3 retired the plain-directory store, and a database
+  # is the right default anyway: it supports concurrent writers and the model
+  # registry. A team swaps this for a Postgres-backed tracking server so
+  # everyone logs to one place — the Python API is identical either way.
+  tracking_db: mlflow.db
+  artifact_dir: mlartifacts
+  registered_model_name: churn-guard-classifier
+
 # Business economics — drives threshold selection on Day 3.
 # See docs/problem-definition.md section 4 for the derivation.
 costs:

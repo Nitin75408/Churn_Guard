@@ -31,6 +31,7 @@ models/*
 # MLflow local tracking database and artifacts
 mlruns/
 mlartifacts/
+mlflow.db
 
 # Generated figures and reports
 reports/figures/*
