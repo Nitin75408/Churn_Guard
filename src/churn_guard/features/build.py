@@ -93,7 +93,9 @@ CATEGORICAL_FEATURES = [
 ]
 
 
-class DomainFeatureBuilder(BaseEstimator, TransformerMixin):
+class DomainFeatureBuilder(TransformerMixin, BaseEstimator):
+    # Mixin before BaseEstimator — scikit-learn resolves estimator type through
+    # __sklearn_tags__ along the MRO, and the reverse order breaks that.
     """Clean the known data defects and add the engineered features.
 
     Stateless: ``fit`` learns nothing and exists only to satisfy the scikit-learn

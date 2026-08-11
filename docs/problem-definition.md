@@ -111,24 +111,50 @@ from this table.
 | Cost of a retention offer | **$78** | 20% discount for 6 months |
 | Offer acceptance rate | **30%** | industry assumption |
 
-### Cost matrix
+### Value matrix
 
-|  | Predicted: stay | Predicted: churn |
+Measured against the counterfactual of contacting nobody, so "do nothing" scores 0.
+
+|  | Predicted: stay (no contact) | Predicted: churn (contact) |
 |---|---|---|
-| **Actually stays** | **TN** — $0 | **FP** — **−$78** (wasted discount) |
-| **Actually churns** | **FN** — **−$780** (customer lost) | **TP** — **+$156** (0.30 × 780 − 78) |
+| **Actually stays** | **TN** — $0 | **FP** — **−$78** (wasted offer) |
+| **Actually churns** | **FN** — $0 | **TP** — **+$156** (0.30 × 780 − 78) |
 
-### Implication
+### Regret — the quantity that sets the threshold
+
+The cost of a false negative is **not** the customer's full $780. Most churners are
+lost even when contacted, because the offer succeeds only 30% of the time. What a
+miss actually forfeits is the *expected value of the intervention*:
 
 ```
-cost(False Negative)  =  10 ×  cost(False Positive)
+regret(FN) = 0.30 × $780 − $78 = $156     the gain we failed to capture
+regret(FP) =                     $78      the offer we wasted
+
+ratio = 2 : 1
 ```
 
-A missed churner is **ten times** more expensive than a false alarm. Therefore the
-default `0.5` decision threshold — which implicitly assumes the errors cost the same —
-is **wrong for this problem**. The operating threshold will be chosen by maximising
-expected value on the validation set, and is expected to land well below 0.5,
-trading precision for recall.
+### Implied decision threshold
+
+Contact a customer when the expected gain exceeds the offer cost:
+
+```
+p × (acceptance_rate × CLV)  >  offer_cost
+p × (0.30 × 780)             >  78
+p                            >  78 / 234  =  0.333
+```
+
+> **Operating threshold ≈ 0.333**, not the scikit-learn default of 0.5.
+
+The default 0.5 implicitly assumes both errors cost the same, which is false here.
+0.333 is confirmed empirically against the validation set on Day 3, together with a
+sensitivity analysis over the acceptance rate — that assumption is the least certain
+input and the threshold moves inversely with it.
+
+**Note on an earlier draft:** this section previously compared $780 against $78 and
+concluded a 10:1 ratio. That was wrong. It valued a miss at the customer's entire
+lifetime value while ignoring that intervening rescues only 30% of them. The
+correction generalises: *the cost of a false negative is the value of the intervention
+you failed to make, never the full value of the outcome you failed to prevent.*
 
 ---
 
