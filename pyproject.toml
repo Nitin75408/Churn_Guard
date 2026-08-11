@@ -1,28 +1,44 @@
 [project]
 name = "churn-guard"
 version = "0.1.0"
-description = "Add your description here"
+description = "Customer churn prediction with cost-based decisioning, served over an API"
 readme = "README.md"
 authors = [
     { name = "Nitin Madaan", email = "nitinmad73@gmail.com" }
 ]
 requires-python = ">=3.12"
+
+# Runtime only — everything the API and dashboard need to serve predictions.
+# The Docker image installs exactly this set (`uv sync --no-dev`), which keeps it
+# smaller, faster to build, and smaller as a security surface. Training-only and
+# analysis-only tools live in the dev group below.
+#
+# pandas is capped below 3 because mlflow requires pandas<3, and numpy below 2.4
+# because numba (a shap dependency) has not caught up. Pinning the stack for
+# mutual compatibility beats chasing the newest release of any single package.
 dependencies = [
     "fastapi>=0.141.1",
-    "ipykernel>=7.3.0",
     "joblib>=1.5.3",
-    "jupyterlab>=4.6.2",
     "matplotlib>=3.11.1",
-    "mlflow>=3.0",
     "numpy>=1.26,<2.4",
     "pandas>=2.2,<3",
+    "pyarrow>=24.0.0",
     "pyyaml>=6.0.3",
     "requests>=2.34.2",
     "scikit-learn>=1.9.0",
-    "seaborn>=0.13.2",
     "shap>=0.52.0",
     "streamlit>=1.61.1",
     "uvicorn>=0.52.1",
+]
+
+[dependency-groups]
+# Training, experiment tracking and exploratory analysis. Installed locally by
+# default (`uv sync`), excluded from the serving image (`uv sync --no-dev`).
+dev = [
+    "ipykernel>=7.3.0",
+    "jupyterlab>=4.6.2",
+    "mlflow>=3.0",
+    "seaborn>=0.13.2",
 ]
 
 [project.scripts]

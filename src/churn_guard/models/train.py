@@ -384,6 +384,21 @@ def main() -> None:
     model_path = Path(cfg.paths.models) / "model.joblib"
     joblib.dump(best_search.best_estimator_, model_path)
 
+    # Save a small transformed sample beside the model for SHAP to use as its
+    # background distribution at serving time. Without this the API would have
+    # to load data/interim/train.csv, which means shipping the training set
+    # inside the production image and breaking if that file ever moves. A
+    # serving artifact should depend only on the model directory.
+    background = (
+        best_search.best_estimator_
+        .named_steps["features"]
+        .transform(X_train.sample(n=min(200, len(X_train)), random_state=seed))
+    )
+    background_path = Path(cfg.paths.models) / "shap_background.parquet"
+    background.to_parquet(background_path, index=False)
+    logger.info("Saved SHAP background sample (%d rows) to %s",
+                len(background), background_path.name)
+
     # Promote the winner to the model registry. The registry is what separates
     # "a file on someone's laptop" from a versioned artifact the serving layer
     # can resolve by name and stage (Staging -> Production -> Archived).

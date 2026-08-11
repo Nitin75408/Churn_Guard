@@ -28,6 +28,7 @@ Visual encoding
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import matplotlib
@@ -42,7 +43,11 @@ import streamlit as st
 from churn_guard.config import load_config
 from churn_guard.data.split import load_split
 
-API_URL = "http://127.0.0.1:8000"
+# Configurable because the address differs by environment: localhost when both
+# processes run on your machine, the compose service name inside Docker, a real
+# hostname in a cluster. Hardcoding it would make the image environment-specific,
+# which defeats the point of building one.
+API_URL = os.getenv("CHURNGUARD_API_URL", "http://127.0.0.1:8000")
 REQUEST_TIMEOUT = 5
 
 # Validated palette values (see the data-viz reference palette).

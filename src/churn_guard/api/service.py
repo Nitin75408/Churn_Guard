@@ -91,12 +91,26 @@ class ChurnService:
         try:
             import shap
 
-            from churn_guard.data.split import load_split
+            # Prefer the background sample saved next to the model, so serving
+            # depends only on the model directory. Falling back to the training
+            # CSV keeps local development working before a retrain, but a
+            # deployed image should never need it.
+            background_path: Path = self.cfg.paths.models / "shap_background.parquet"
+            if background_path.is_file():
+                background = pd.read_parquet(background_path)
+                logger.info("SHAP background loaded from %s", background_path.name)
+            else:
+                from churn_guard.data.split import load_split
 
-            train = load_split("train", self.cfg)
-            background = self.pipeline.named_steps["features"].transform(
-                train.drop(columns=[self.cfg.data.target_column])
-            )
+                logger.warning(
+                    "%s missing — falling back to the training split. Retrain to "
+                    "generate it.",
+                    background_path.name,
+                )
+                train = load_split("train", self.cfg)
+                background = self.pipeline.named_steps["features"].transform(
+                    train.drop(columns=[self.cfg.data.target_column])
+                )
             self._feature_names = list(background.columns)
             self._explainer = shap.LinearExplainer(
                 self.pipeline.named_steps["model"], background

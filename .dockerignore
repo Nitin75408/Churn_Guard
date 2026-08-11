@@ -1,0 +1,64 @@
+# Everything listed here is excluded from the build context — the set of files
+# Docker uploads to the daemon before building.
+#
+# This file matters more than it looks. A bloated context slows every build and,
+# worse, invalidates layer caches: if .venv is in the context, touching any
+# installed package busts the cache and forces a full reinstall. It is also the
+# main defence against baking secrets into an image.
+
+# The virtual environment is host-specific and huge. The image builds its own
+# from uv.lock, which is the whole point of committing a lockfile.
+.venv/
+
+# Git history — hundreds of megabytes in a mature repo, useless at runtime, and
+# a common way that deleted-but-still-in-history secrets end up in an image.
+.git/
+.gitignore
+
+# Python bytecode, rebuilt inside the image.
+__pycache__/
+**/__pycache__/
+*.py[oc]
+*.egg-info/
+build/
+dist/
+
+# Training data. The serving image needs neither the raw download nor the
+# training and validation splits — SHAP's background distribution is saved next
+# to the model at training time precisely so serving does not depend on them.
+# test.csv is kept deliberately: the dashboard's worklist tab scores it as demo
+# data. A production image would drop it and read customers from the warehouse.
+data/raw/
+data/processed/
+data/interim/train.csv
+data/interim/val.csv
+
+# Experiment tracking. Runs and their artifacts belong on a tracking server, not
+# inside a serving image.
+mlruns/
+mlartifacts/
+mlflow.db
+
+# Generated figures and search histories. final_evaluation.json is NOT excluded:
+# the API reads the operating threshold from it.
+reports/figures/
+reports/cv_results_*.csv
+reports/explainability.json
+
+# Logs are written at runtime.
+logs/
+
+# Local tooling and editor state.
+.vscode/
+.idea/
+.DS_Store
+.ipynb_checkpoints/
+notebooks/
+tests/
+docs/
+
+# Secrets. Belt and braces — these should never exist in the repo, but an
+# image is forever and a leaked key is expensive.
+.env
+*.pem
+*.key

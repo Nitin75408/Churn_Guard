@@ -1,0 +1,59 @@
+# ChurnGuard — API and dashboard, started together.
+#
+#   docker compose up --build
+#
+#   API   http://localhost:8000/docs
+#   UI    http://localhost:8501
+#
+# Both services run the same image with different commands. One build, one
+# artifact, two roles — so the dashboard can never be running against a
+# different version of the code than the API it calls.
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: churn-guard:latest
+    container_name: churnguard-api
+    ports:
+      - "8000:8000"
+    healthcheck:
+      # Repeated from the Dockerfile so compose can gate the dashboard on it.
+      test: ["CMD", "python", "-c", "import sys,urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).status == 200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: churn-guard:latest
+    container_name: churnguard-ui
+    depends_on:
+      api:
+        # Waits for the API to report healthy, not merely to have started. A bare
+        # depends_on only waits for the container to exist, which would let the
+        # dashboard start first and silently fall back to in-process scoring —
+        # working, but not demonstrating the architecture.
+        condition: service_healthy
+    environment:
+      # Compose provides DNS on the shared network, so the API is reachable by
+      # service name. This is why the address had to be configurable rather than
+      # hardcoded to localhost.
+      CHURNGUARD_API_URL: http://api:8000
+    command:
+      - streamlit
+      - run
+      - streamlit_app.py
+      - --server.address=0.0.0.0
+      - --server.port=8501
+      - --server.headless=true
+      # Streamlit collects usage stats by default; off by choice.
+      - --browser.gatherUsageStats=false
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
