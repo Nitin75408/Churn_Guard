@@ -8,11 +8,14 @@ Run it::
 
 Why an export step exists
 -------------------------
-Tableau Public and other free BI tiers read files rather than databases. The SQL
-still does the real work — joins, aggregation, window functions — and the export
-is the handoff. This is a normal BI pattern, not a workaround: extract-based
-dashboards are how most reporting runs at scale, because a dashboard hitting the
-warehouse live on every filter click is both slow and expensive.
+Not every consumer can reach the database. Free BI tiers read files rather than
+connections, analysts want a spreadsheet, and a colleague wants something they
+can open without credentials. The SQL still does the real work — joins,
+aggregation, window functions — and the export is the handoff.
+
+This is a normal pattern rather than a workaround: extract-based reporting is how
+most analytics runs at scale, because a dashboard hitting the warehouse live on
+every filter click is both slow and expensive.
 
 What gets exported
 ------------------
@@ -124,7 +127,7 @@ def main() -> None:
     written = export_all(cfg)
 
     print(f"\n{'=' * 74}")
-    print("  EXPORTED FOR TABLEAU")
+    print("  ANALYTICS EXTRACTS")
     print(f"{'=' * 74}\n")
     for name, path in written.items():
         size_kb = path.stat().st_size / 1024
