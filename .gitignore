@@ -16,6 +16,8 @@ wheels/
 data/raw/*
 data/interim/*
 data/processed/*
+# BI extracts — regenerate with `uv run python -m churn_guard.data.export_bi`
+data/exports/*
 !data/**/.gitkeep
 # ...but the split manifest is metadata, not data: a few hundred bytes
 # recording seed, split sizes and ID fingerprints. Committing it makes the
