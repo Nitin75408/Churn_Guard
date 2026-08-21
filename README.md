@@ -2,9 +2,16 @@
 
 **Customer churn prediction that optimises money, not accuracy.**
 
+[![Live demo](https://img.shields.io/badge/demo-live-brightgreen?style=flat&logo=streamlit&logoColor=white)](https://churnguard-jluuzdkc7cndyetu9vpqvs.streamlit.app/)
 [![CI](https://github.com/Nitin75408/Churn_Guard/actions/workflows/ci.yml/badge.svg)](https://github.com/Nitin75408/Churn_Guard/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![Code style: ruff](https://img.shields.io/badge/lint-ruff-261230.svg)](https://github.com/astral-sh/ruff)
+
+### ▶ **[Try the live demo](https://churnguard-jluuzdkc7cndyetu9vpqvs.streamlit.app/)**
+
+Move the tenure slider to 1 month on a month-to-month fiber plan and watch the
+risk score, then switch to a two-year contract. The **Retention worklist** tab
+shows the ranked call list and its hit rate.
 
 An end-to-end machine learning system: **SQL analytics warehouse** → reproducible
 data pipeline → leakage-free training → cost-based decisioning → explainable REST
@@ -34,6 +41,10 @@ baseline, so the comparison is like for like.
 ---
 
 ## Quickstart
+
+### Nothing to install
+
+**[https://churnguard-jluuzdkc7cndyetu9vpqvs.streamlit.app/](https://churnguard-jluuzdkc7cndyetu9vpqvs.streamlit.app/)** — deployed from this repository, redeployed on every push.
 
 ### Docker (nothing to install but Docker)
 
