@@ -29,7 +29,16 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
+
+# Streamlit Community Cloud installs from requirements.txt and runs this file
+# from the repository root — it never installs the project itself, so the src/
+# layout would leave churn_guard unimportable. Adding src/ to the path is a
+# no-op when the package is properly installed, as it is locally and in Docker.
+_SRC = Path(__file__).resolve().parent / "src"
+if _SRC.is_dir() and str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
 
 import matplotlib
 
@@ -185,9 +194,11 @@ info = client.info()
 with st.sidebar:
     st.title("📉 ChurnGuard")
     if client.mode == "api":
-        st.success("Connected to API")
+        st.success("Connected to the prediction API")
     else:
-        st.warning("API unreachable — scoring locally")
+        # Not an error: the same scoring code runs in-process. Worth showing so
+        # the reader knows which path is live, but not worth alarming them.
+        st.info("Scoring in-process — model loaded directly")
 
     st.caption("Model in service")
     st.write(f"**{info.get('model_family', '?')}** · registry v{info.get('registered_version') or '-'}")

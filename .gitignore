@@ -23,12 +23,23 @@ data/exports/*
 # recording seed, split sizes and ID fingerprints. Committing it makes the
 # sealed test set auditable.
 !data/interim/split_manifest.json
+# The deployed dashboard scores this as its demo customer list (142 KB).
+!data/interim/test.csv
 
 # Trained models — same reasoning. Binary files, often large, regenerated
 # by running the training pipeline. In industry these live in a model
 # registry (MLflow) or object storage (S3), not git.
 models/*
 !models/.gitkeep
+# ...with a deliberate exception. Streamlit Community Cloud deploys from this
+# git repository, so anything the running app needs must be committed. These
+# three total ~45 KB — a linear model, its metadata, and a 200-row SHAP
+# background sample. Committing a 45 KB serving artifact is not the "datasets
+# in git" problem the rule above exists to prevent. A larger model would go to
+# the MLflow registry or object storage and be fetched at startup instead.
+!models/model.joblib
+!models/model_metadata.json
+!models/shap_background.parquet
 
 # MLflow local tracking database and artifacts
 mlruns/

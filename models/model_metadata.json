@@ -1,0 +1,29 @@
+{
+  "model_family": "logistic_regression",
+  "selection_reason": "random_forest scored highest (0.6681) but logistic_regression (0.6661) is within one standard error (0.0099) and is simpler",
+  "mlflow_run_id": "30095c6f3075460292050f1e85189c95",
+  "registered_model_version": 3,
+  "best_params": {
+    "C": 0.9761125443110458,
+    "class_weight": null,
+    "solver": "lbfgs"
+  },
+  "cv_pr_auc": 0.6661321288471171,
+  "validation": {
+    "model": "logistic_regression",
+    "roc_auc": 0.8347672157610888,
+    "pr_auc": 0.640040173560186,
+    "brier": 0.13887327592810583,
+    "threshold": 0.3333333333333333,
+    "precision": 0.5549295774647888,
+    "recall": 0.701067615658363,
+    "f1": 0.6194968553459119,
+    "accuracy": 0.771050141911069,
+    "precision_at_k": 0.7866666666666666,
+    "k": 75,
+    "value_per_1000": 17415.326395458844
+  },
+  "decision_threshold": 0.3333333333333333,
+  "random_seed": 42,
+  "sklearn_feature_count": 35
+}

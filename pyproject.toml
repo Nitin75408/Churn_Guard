@@ -82,3 +82,10 @@ select = [
 # E501 is handled by the formatter; private-member access is deliberate in the
 # few places tests reach into scikit-learn internals to verify fitted state.
 ignore = ["E501", "SLF001"]
+
+[tool.ruff.lint.per-file-ignores]
+# E402 (import not at top of file). This file must run two statements before
+# its imports: matplotlib.use("Agg") has to precede pyplot, and src/ has to
+# join sys.path before churn_guard is importable on hosts that install from
+# requirements.txt without installing the project. Both are deliberate.
+"streamlit_app.py" = ["E402"]
