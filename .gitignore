@@ -55,3 +55,8 @@ logs/
 # IDE
 .vscode/
 .idea/
+
+# Tableau: generated workbooks. Regenerate with
+# `uv run python tools/build_tableau_workbook.py`
+tableau/*.twb
+tableau/*.twbx
