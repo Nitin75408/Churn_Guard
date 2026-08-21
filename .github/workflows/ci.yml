@@ -116,7 +116,9 @@ jobs:
       # otherwise reach production.
       - name: Start the container
         run: |
-          docker run -d --name churnguard -p 8000:8000 churn-guard:ci
+          # Both ports: the image's default command now starts the API and the
+          # dashboard, and both are worth smoke testing.
+          docker run -d --name churnguard -p 8000:8000 -p 7860:7860 churn-guard:ci
           for attempt in $(seq 1 30); do
             if curl -fsS http://localhost:8000/health > /dev/null 2>&1; then
               echo "healthy after ${attempt}0s"
@@ -127,6 +129,13 @@ jobs:
           echo "::error::container never became healthy"
           docker logs churnguard
           exit 1
+
+      - name: Check the dashboard is serving
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 http://localhost:7860/)
+          [ "$code" = "200" ] \
+            || { echo "::error::dashboard returned $code"; docker logs churnguard; exit 1; }
+          echo "dashboard responding on 7860"
 
       - name: Check the model actually loaded
         run: |
