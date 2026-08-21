@@ -35,9 +35,12 @@ mlruns/
 mlartifacts/
 mlflow.db
 
-# Generated figures and reports
+# Generated figures and search histories. final_evaluation.json IS committed:
+# it holds the sealed-test results and the operating threshold the API reads.
 reports/figures/*
 !reports/figures/.gitkeep
+reports/cv_results_*.csv
+reports/explainability.json
 
 # Log files — regenerated on every run, and can grow large.
 logs/
