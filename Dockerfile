@@ -73,6 +73,7 @@ WORKDIR /app
 # build dependencies stay behind.
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 
+COPY --chown=app:app docker-entrypoint.sh ./
 COPY --chown=app:app src ./src
 COPY --chown=app:app configs ./configs
 COPY --chown=app:app models ./models
@@ -96,7 +97,7 @@ ENV PATH="/app/.venv/bin:$PATH" \
 
 USER app
 
-EXPOSE 8000 8501
+EXPOSE 7860 8000 8501
 
 # Docker restarts or reroutes traffic based on this. start-period covers model
 # loading and SHAP explainer construction, which take a few seconds; without it
@@ -104,6 +105,7 @@ EXPOSE 8000 8501
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
   CMD python -c "import sys,urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).status == 200 else 1)"
 
-# Default command runs the API. docker-compose.yml overrides it for the dashboard,
-# so both services share one image and one build.
-CMD ["uvicorn", "churn_guard.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Default: API plus dashboard in one process tree, for hosts that expose a
+# single port. docker-compose overrides this to run each service separately,
+# which is the arrangement a production deployment would use.
+CMD ["./docker-entrypoint.sh"]
