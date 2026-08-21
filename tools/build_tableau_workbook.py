@@ -139,8 +139,13 @@ def worksheet(
     encodings_xml = ("\n".join(encodings)) if encodings else ""
     encodings_block = f"            <encodings>\n{encodings_xml}\n            </encodings>\n" if encodings else ""
 
-    rows_xml = " ".join(f"[{DS}].[{f}]" for f in rows)
-    cols_xml = " ".join(f"[{DS}].[{f}]" for f in cols)
+    # Nested fields on a shelf are joined with '/', not whitespace. The shelf
+    # value is a small expression language, and a space between two field
+    # references parses as two operands with no operator between them —
+    # Tableau reports "unable to associate operators with operands" and
+    # rejects the sheet.
+    rows_xml = " / ".join(f"[{DS}].[{f}]" for f in rows)
+    cols_xml = " / ".join(f"[{DS}].[{f}]" for f in cols)
 
     return f"""    <worksheet name='{escape(name)}'>
       <table>
