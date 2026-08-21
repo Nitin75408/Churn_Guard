@@ -99,3 +99,25 @@ logging:
   filename: churn_guard.log
   max_bytes: 5242880    # 5 MB, then rotate
   backup_count: 3
+
+warehouse:
+  # Analytics warehouse — raw storage, cleaning views and the marts BI tools
+  # read. Credentials come from the environment so nothing secret is committed;
+  # the defaults match docker-compose.yml for local development only.
+  host_env: CHURNGUARD_DB_HOST
+  port_env: CHURNGUARD_DB_PORT
+  user_env: CHURNGUARD_DB_USER
+  password_env: CHURNGUARD_DB_PASSWORD
+  database_env: CHURNGUARD_DB_NAME
+  defaults:
+    host: localhost
+    port: 5432
+    user: churnguard
+    password: churnguard
+    database: churnguard
+  # Schema separation mirrors how a real warehouse is organised: raw data is
+  # never edited, and everything downstream is a view built on top of it.
+  raw_schema: raw
+  analytics_schema: analytics
+  raw_table: customers
+  sql_dir: sql

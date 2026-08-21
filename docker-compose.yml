@@ -57,3 +57,38 @@ services:
     ports:
       - "8501:8501"
     restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # Analytics warehouse.
+  #
+  # Deliberately NOT a dependency of the API. Serving loads a self-contained
+  # model artifact and must keep working if the warehouse is down — an
+  # analytics database outage should never take predictions offline.
+  #
+  # This is where the SQL layer lives: raw storage, cleaning views, and the
+  # analytics marts that BI tools read.
+  # -------------------------------------------------------------------------
+  postgres:
+    image: postgres:17-alpine
+    container_name: churnguard-db
+    environment:
+      POSTGRES_USER: churnguard
+      POSTGRES_PASSWORD: churnguard
+      POSTGRES_DB: churnguard
+    ports:
+      # Exposed on the host so Power BI, DBeaver or psql can connect directly.
+      - "5432:5432"
+    volumes:
+      # Named volume, so the data survives `docker compose down`. Without it,
+      # every restart would mean reloading the warehouse from scratch.
+      - churnguard_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U churnguard -d churnguard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  churnguard_pgdata:

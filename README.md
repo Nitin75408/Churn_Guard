@@ -7,9 +7,9 @@
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![Code style: ruff](https://img.shields.io/badge/lint-ruff-261230.svg)](https://github.com/astral-sh/ruff)
 
-An end-to-end machine learning system: reproducible data pipeline → leakage-free
-training → cost-based decisioning → explainable REST API → demo dashboard →
-containerised deployment → CI.
+An end-to-end machine learning system: **SQL analytics warehouse** → reproducible
+data pipeline → leakage-free training → cost-based decisioning → explainable REST
+API → demo dashboard → containerised deployment → CI.
 
 ---
 
@@ -60,10 +60,14 @@ uv run python -m churn_guard.models.train    # tune 3 families, track in MLflow
 uv run python -m churn_guard.models.evaluate # threshold, then the sealed test set
 uv run python -m churn_guard.models.explain  # SHAP + fairness slices
 
+# SQL analytics layer (optional — needs Docker)
+docker compose up -d postgres
+uv run python -m churn_guard.data.warehouse  # load raw + build views, print marts
+
 uv run uvicorn churn_guard.api.main:app --reload   # API
 uv run streamlit run streamlit_app.py              # dashboard
 uv run mlflow ui --backend-store-uri sqlite:///mlflow.db   # experiment history
-uv run pytest                                      # 64 tests
+uv run pytest                                      # 78 tests
 ```
 
 ---
@@ -141,6 +145,85 @@ flowchart TB
 not a bare model. It receives raw customer records and reimplements zero
 preprocessing — so train/serve skew is impossible by construction rather than by
 discipline.
+
+---
+
+## The SQL analytics layer
+
+A PostgreSQL warehouse sits beside the ML pipeline, organised in the standard
+**medallion** pattern:
+
+```
+raw.customers            bronze — verbatim copy of the source, blanks and all
+analytics.v_customers    silver — typed, renamed, cleaned; one source of truth
+analytics.v_*            gold   — aggregated marts a BI tool reads directly
+```
+
+```bash
+docker compose up -d postgres
+uv run python -m churn_guard.data.warehouse
+```
+
+Then connect Power BI, Tableau, DBeaver or `psql` to `localhost:5432`
+(database `churnguard`).
+
+### Why a warehouse at all
+
+| Reason | |
+|---|---|
+| **Scale** | 7k rows fit in pandas; 50M do not. Aggregation belongs in the database. |
+| **One version of the truth** | The churn definition, the `TotalCharges` fix and the category collapsing live in *one view*. An analyst and a data scientist cannot disagree about the numbers. |
+| **BI tools speak SQL** | Power BI cannot import a pandas script. It connects to a database. |
+
+### What deliberately stays *out* of SQL
+
+**Model feature engineering.** Serving receives a single JSON record with no
+database to query, so features must be produced by the same fitted pipeline in
+training and inference. Reimplementing them in SQL would create two copies of
+the logic that drift apart — the exact train/serve skew the pipeline exists to
+prevent.
+
+> **SQL owns *what is true about customers*. The pipeline owns *what the model
+> eats*.** Different jobs, no duplication.
+
+### What the marts surface
+
+| View | Answers |
+|---|---|
+| `v_kpi_summary` | headline KPIs for dashboard cards |
+| `v_churn_by_segment` | churn by contract × internet, with `ROLLUP` subtotals |
+| `v_retention_curve` | retention by tenure band, with `LAG` band-over-band deltas |
+| `v_revenue_at_risk` | segments ranked by revenue lost, with running share |
+| `v_addon_paradox` | Simpson's paradox, conditioned and unconditioned |
+| `v_customer_risk` | transparent rules-based score, `NTILE` deciles |
+
+### A finding only the SQL layer surfaced
+
+```
+churn rate (customers)   26.54%
+churn rate (revenue)     30.50%   ← higher
+```
+
+**Churners are above-average spenders**, so the business loses proportionally
+more revenue than customers. That reframes the case: the model is protecting
+**30% of revenue**, not 26% of headcount.
+
+And the loss is concentrated — the top 5 of 12 contract × payment segments carry
+**91% of all revenue lost**, led by month-to-month fiber customers at **54.6%
+churn** and **$1.2M/year at risk**. That is what makes targeted retention
+worthwhile rather than a blanket discount.
+
+The rules-based SQL score alone separates the base cleanly:
+
+| Risk decile | Actual churn |
+|---|---|
+| 1 (highest) | **70.2%** |
+| 5 | 23.2% |
+| 10 (lowest) | **1.1%** |
+
+A 64× spread from `CASE` expressions and `NTILE` — no model involved. It is the
+transparent baseline the ML model has to beat, and it gives the dashboard a
+ranking without a Python round trip.
 
 ---
 
@@ -299,6 +382,10 @@ Four structural defences:
 ## Project structure
 
 ```
+├── sql/                       the analytics warehouse
+│   ├── 01_schema.sql          raw landing table + constraints  (bronze)
+│   ├── 02_clean.sql           cleaned customer view            (silver)
+│   └── 03_analytics.sql       aggregated marts for BI          (gold)
 ├── configs/config.yaml        every tunable value; nothing hardcoded
 ├── data/                      gitignored — regenerated by the ingest script
 ├── docs/
@@ -309,11 +396,11 @@ Four structural defences:
 │   ├── logger.py              console at INFO, rotating file at DEBUG
 │   ├── exception.py           typed error hierarchy
 │   ├── eda.py                 analysis + figures, training split only
-│   ├── data/                  ingest (with data contract) · split (sealed)
+│   ├── data/                  ingest · split (sealed) · warehouse (SQL loader)
 │   ├── features/build.py      all 10 EDA decisions as sklearn transformers
 │   ├── models/                metrics · baselines · train · evaluate · explain
 │   └── api/                   schemas (Pydantic) · service · FastAPI app
-├── tests/                     64 tests
+├── tests/                     78 tests
 ├── streamlit_app.py           demo dashboard
 ├── Dockerfile                 multi-stage, non-root
 └── .github/workflows/ci.yml   lint → pipeline → tests → image → smoke test
@@ -376,8 +463,8 @@ customers.
 
 ## Stack
 
-Python 3.12 · uv · scikit-learn · pandas · MLflow · SHAP · FastAPI · Pydantic ·
-Streamlit · Docker · pytest · ruff · GitHub Actions
+Python 3.12 · **PostgreSQL / SQL** · uv · scikit-learn · pandas · MLflow · SHAP ·
+FastAPI · Pydantic · Streamlit · Docker · pytest · ruff · GitHub Actions
 
 ## Data
 
