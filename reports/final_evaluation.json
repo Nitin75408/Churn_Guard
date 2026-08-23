@@ -15,6 +15,21 @@
     "k": 75,
     "value_per_1000": 18079.4701986755
   },
+  "business_rule_on_test": {
+    "model": "B1 business rule (test)",
+    "roc_auc": 0.6678088803088803,
+    "pr_auc": 0.41720780317803563,
+    "brier": 0.1675593942868248,
+    "threshold": 0.2785714285714286,
+    "precision": 0.6173469387755102,
+    "recall": 0.43214285714285716,
+    "f1": 0.5084033613445378,
+    "accuracy": 0.7786187322611163,
+    "precision_at_k": 0.64,
+    "k": 75,
+    "value_per_1000": 12323.557237464522
+  },
+  "value_uplift_vs_rule": 0.4611,
   "test": {
     "model": "TEST (sealed)",
     "roc_auc": 0.853389869461298,

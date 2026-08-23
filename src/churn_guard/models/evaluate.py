@@ -42,6 +42,7 @@ from churn_guard.data.split import MANIFEST_FILENAME, _fingerprint, load_split
 from churn_guard.exception import DataValidationError, ModelNotFoundError
 from churn_guard.features.build import load_xy
 from churn_guard.logger import get_logger
+from churn_guard.models.baselines import BusinessRuleClassifier
 from churn_guard.models.metrics import Costs, evaluate, expected_value, format_table
 
 logger = get_logger(__name__)
@@ -306,9 +307,21 @@ def main() -> None:
     y_test_prob = model.predict_proba(X_test)[:, 1]
     population = len(X_val) + len(X_test) + 4929
 
+    # The incumbent rule is scored on the same held-out data at the same
+    # threshold. Comparing a model's test score against a baseline's validation
+    # score would flatter whichever happened to draw the easier split — the
+    # comparison is only meaningful like for like.
+    X_train_raw, y_train_raw = load_xy("train", cfg)
+    rule = BusinessRuleClassifier().fit(X_train_raw, y_train_raw)
+    rule_metrics = evaluate(
+        "B1 business rule (test)", y_test_true, rule.predict_proba(X_test)[:, 1],
+        costs, threshold=empirical, total_population=population,
+    )
+
     rows = [
         evaluate("validation", y_val_true, y_val_prob, costs,
                  threshold=empirical, total_population=population),
+        rule_metrics,
         evaluate("TEST (sealed)", y_test_true, y_test_prob, costs,
                  threshold=empirical, total_population=population),
     ]
@@ -321,7 +334,7 @@ def main() -> None:
     print(f"\n{'=' * 92}")
     print("  5. ACCEPTANCE CRITERIA  (fixed on Day 1, before any results)")
     print(f"{'=' * 92}\n")
-    test_metrics = rows[1]
+    test_metrics = rows[2]
     targets = {
         "PR-AUC": (test_metrics.pr_auc, float(cfg.evaluation.targets.average_precision)),
         "ROC-AUC": (test_metrics.roc_auc, float(cfg.evaluation.targets.roc_auc)),
@@ -331,10 +344,17 @@ def main() -> None:
         status = "PASS" if achieved >= target else "MISS"
         print(f"  {label:<10} target >= {target:.3f}   achieved {achieved:.3f}   {status}")
 
+    uplift = test_metrics.value_per_1000 / rule_metrics.value_per_1000 - 1
+    print("\n  Model vs the incumbent rule, both on the sealed test set:")
+    print(f"    business rule : ${rule_metrics.value_per_1000:>9,.0f} per 1,000")
+    print(f"    model         : ${test_metrics.value_per_1000:>9,.0f} per 1,000   ({uplift:+.0%})")
+
     results = {
         "operating_threshold": empirical,
         "theoretical_threshold": theoretical,
         "validation": rows[0].as_dict(),
+        "business_rule_on_test": rule_metrics.as_dict(),
+        "value_uplift_vs_rule": round(float(uplift), 4),
         "test": test_metrics.as_dict(),
         "sensitivity": sensitivity.to_dict(orient="records"),
         "acceptance_criteria": {

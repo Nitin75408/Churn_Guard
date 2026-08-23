@@ -1,0 +1,14 @@
+{
+  "customers_in_both_splits": 727,
+  "share_of_test_seen_in_training": 0.4367,
+  "leaky": {
+    "roc_auc": 0.957,
+    "pr_auc": 0.9515
+  },
+  "honest": {
+    "roc_auc": 0.8085,
+    "pr_auc": 0.5939
+  },
+  "roc_auc_inflation_pct": 18.4,
+  "pr_auc_inflation_pct": 60.2
+}
